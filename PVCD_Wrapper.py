@@ -9,7 +9,7 @@ path_to_pvcd = '/home/felipe/Documents/memoria/Servidor/multimedia_tools/instala
 
 pvcd_db = path_to_pvcd + 'pvcd_db'
 pvcd_search = path_to_pvcd + 'pvcd_search'
-
+pvcd_detect = path_to_pvcd + 'pvcd_detect'
 pvcd_new_db = pvcd_db + ' -new -db '
 
 
@@ -80,6 +80,37 @@ def write_descriptors(db_name, descriptors):
 	return
 
 
-def search(db_name):
-	pass
+def new_search_profile(db_name):
 
+	db_path = db_name + '_db'
+
+	call([pvcd_search, '-new', '-profile', 'buscar', '-query', db_path, '-reference',\
+		  'videos_db', '-desc', 'ghd', '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+	return
+
+
+def search():
+	call([pvcd_search, '-ss', '-profile', 'buscar', '-knn', '3'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+	return
+
+
+def detect():
+	status = call([pvcd_detect, '-detect', '-ss', 'buscar\ss,segments-knn_3.txt', '-minLength', '1s', '-out', 'detections.txt'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+	detections=[]
+	with open('databases/detections.txt') as f:
+		detection = {}
+		for line in f:
+			items = line.split('\t')
+			if is_number(items[0]):
+				detection['score'] = items[0]
+				detection['reference'] = items[4]
+				detections.append(detection)
+	return detections
+
+
+def is_number(s):
+	try:
+		float(s)
+		return True
+	except ValueError:
+		return False

@@ -16,6 +16,7 @@ def hello():
 @app.route("/search/api/search_by_descriptor", methods=['POST'])
 def search_by_descriptor():
 	datos = request.get_json()
+	detections = []
 	if datos is not None:
 		length = len(datos)
 		app.logger.info('Length: %d', length)
@@ -28,9 +29,8 @@ def search_by_descriptor():
 		PVCD_Wrapper.search()
 		detections = PVCD_Wrapper.detect()
 		app.logger.info(detections)
-		# return jsonify(datos)
-		return 'aaa'
-	return 'No se recibieron datos'
+		
+	return jsonify(detections=detections)
 
 
 if __name__ == "__main__":

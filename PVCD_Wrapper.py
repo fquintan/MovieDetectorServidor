@@ -26,7 +26,7 @@ def create_database(name):
 	return
 
 
-def create_segmentation(db_name, descriptors):
+def create_segmentation(db_name, descriptor_parser):
 	filename = 'databases/' + db_name + '_db/segmentations/SEGCTE_0.25/segmentation.des'
 	content = '#PVCD::SegmentationData=1.0\nsegmentation=SEGCTE_0.25\n'
 	# First create the segmentation.des file which is the same for every query
@@ -40,44 +40,21 @@ def create_segmentation(db_name, descriptors):
 	if not os.path.exists(os.path.dirname(filename)):
 		os.makedirs(os.path.dirname(filename))
 	with open(filename, 'w+') as seg_file:
-		seg_file.write('#PVCD::FileSegmentation=1.1\n')
-		seg_file.write(str(len(descriptors)) + '\t24.0\n')
-		frames_start = [descriptor.get('frameNumber') for descriptor in descriptors]
-		frames_last = [x-1 for x in frames_start[1:] + [frames_start[-1]+2]]
-		timestamps = [descriptor.get('timestamp')/1000.0 for descriptor in descriptors]
-		time_steps = [y-x for x, y in zip(timestamps[:-1], timestamps[1:])] + [0.1]
-		for start, end, timestamp, time_step in zip(frames_start, frames_last, timestamps, time_steps):
-			middle = (start + end) / 2
-			seg_file.write(str(start) + '\t')
-			seg_file.write(str(middle) + '\t')
-			seg_file.write(str(end) + '\t')
-			seg_file.write(str(timestamp) + '\t')
-			seg_file.write(str(timestamp + (time_step / 2)) + '\t')
-			seg_file.write(str(timestamp + time_step) + '\n')
+		for line in descriptor_parser.get_segmentation():
+			seg_file.write(line)
+
 	return
 
 
-def write_descriptors(db_name, descriptors):
-	descriptor_kind = 'HISTGRAY_2x2_4F_64'
-	segmentation = 'SEGCTE_0.25'
-	array_length = len(descriptors[0].get('descriptor'))
-	template = Template(templates.descriptor_template)
-	content = template.substitute(descriptor_kind=descriptor_kind,
-								  segmentation=segmentation,
-								  array_length=array_length)
+def write_descriptors(db_name, descriptor_parser):
 	filename = 'databases/' + db_name + '_db/descriptors/ghd/descriptor.des'
 	if not os.path.exists(os.path.dirname(filename)):
 		os.makedirs(os.path.dirname(filename))
 	with open(filename, 'w+') as db_file:
-		db_file.write(content)
+		db_file.write(descriptor_parser.get_descriptor_options())
 
 	filename = 'databases/' + db_name + '_db/descriptors/ghd/' + db_name + '.bin'
-	output_file = open(filename, 'wb')
-	for descriptor in descriptors:
-		descriptor_array = descriptor.get('descriptor')
-		float_array = array('f', descriptor_array)
-		float_array.tofile(output_file)
-	output_file.close()
+	descriptor_parser.write_descriptors(filename)
 	return
 
 

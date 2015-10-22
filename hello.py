@@ -30,7 +30,7 @@ def search_by_descriptor():
 		PVCD_Wrapper.create_database(db_name)
 		PVCD_Wrapper.create_segmentation(db_name, descriptor_parser)
 		PVCD_Wrapper.write_descriptors(db_name, descriptor_parser)
-		PVCD_Wrapper.new_search_profile(db_name)
+		PVCD_Wrapper.new_search_profile(db_name, descriptor_parser.get_alias())
 		PVCD_Wrapper.search()
 		detections = PVCD_Wrapper.detect()
 		# detections = []

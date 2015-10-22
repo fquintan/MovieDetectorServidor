@@ -47,23 +47,23 @@ def create_segmentation(db_name, descriptor_parser):
 
 
 def write_descriptors(db_name, descriptor_parser):
-	filename = 'databases/' + db_name + '_db/descriptors/ghd/descriptor.des'
+	filename = 'databases/' + db_name + '_db/descriptors/' + descriptor_parser.get_alias() + '/descriptor.des'
 	if not os.path.exists(os.path.dirname(filename)):
 		os.makedirs(os.path.dirname(filename))
 	with open(filename, 'w+') as db_file:
 		db_file.write(descriptor_parser.get_descriptor_options())
 
-	filename = 'databases/' + db_name + '_db/descriptors/ghd/' + db_name + '.bin'
+	filename = 'databases/' + db_name + '_db/descriptors/' + descriptor_parser.get_alias() + '/' + db_name + '.bin'
 	descriptor_parser.write_descriptors(filename)
 	return
 
 
-def new_search_profile(db_name):
+def new_search_profile(db_name, descriptor_alias):
 
 	db_path = db_name + '_db'
 
 	call([pvcd_search, '-new', '-profile', 'buscar', '-query', db_path, '-reference',\
-		  'videos_db', '-desc', 'ghd', '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+		  'videos_db', '-desc', descriptor_alias, '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
 	return
 
 

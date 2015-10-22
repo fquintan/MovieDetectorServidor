@@ -63,8 +63,15 @@ class DescriptorParser:
 	def get_data_type(self):
 		pass
 
+	@abstractmethod
+	def get_alias(self):
+		pass
+
 
 class GrayHistogramParser(DescriptorParser):
+	def get_alias(self):
+		return 'ghd'
+
 	def get_data_type(self):
 		if self.quant == '1U':
 			return 'B'
@@ -92,6 +99,39 @@ class GrayHistogramParser(DescriptorParser):
 											 num_subarrays, subarray_length, array_kind)
 
 
+class KeyframeParser(DescriptorParser):
+	def get_alias(self):
+		return 'kf'
+
+	def __init__(self, descriptor_data):
+		super(KeyframeParser, self).__init__(descriptor_data)
+		self.height = self.options.get('height')
+		self.width = self.options.get('width')
+		self.colorspace = self.options.get('colorspace')
+		self.quant = self.options.get('quant')
+
+	def get_data_type(self):
+		if self.quant == '1U':
+			return 'B'
+		else:
+			return 'f'
+
+	def get_descriptor_options(self):
+		if self.quant == '1U':
+			array_kind = 'ARRAY_UCHAR'
+		else:
+			array_kind = 'ARRAY_FLOAT'
+		descriptor_kind = 'KF_' + str(self.width) + 'x' + str(self.height) + '_' + self.colorspace + '_' + str(self.quant)
+		segmentation = 'SEGCTE_0.25'
+		array_length = str(self.height * self.width * 3)
+		num_subarrays = str(self.height * self.width)
+		subarray_length = str(3)
+		return self.fill_descriptor_template(descriptor_kind, segmentation, array_length,
+											 num_subarrays, subarray_length, array_kind)
+
+
 def get_descriptor_parser(descriptor_type, descriptor_data):
 	if descriptor_type == 'GrayHistogram':
 		return GrayHistogramParser(descriptor_data)
+	elif descriptor_type == 'Keyframe':
+		return KeyframeParser(descriptor_data)

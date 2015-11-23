@@ -63,7 +63,7 @@ def new_search_profile(db_name, descriptor_alias):
 	db_path = db_name + '_db'
 
 	call([pvcd_search, '-new', '-profile', 'buscar', '-query', db_path, '-reference',\
-		  'videos_db', '-desc', descriptor_alias, '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+		  'videos_db2', '-desc', descriptor_alias, '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
 	return
 
 
@@ -84,6 +84,16 @@ def detect():
 				detection['reference'] = items[4]
 				detections.append(detection)
 	return detections
+
+
+def compute_descriptors(video_filepath):
+	"""
+	@type video_filepath: str
+	"""
+	call([pvcd_db, '-new', '-db', 'query_db', video_filepath], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+	call([pvcd_db, '-segment', '-db', 'query_db', '-seg', 'SEGCTE_0.25'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+	call([pvcd_db, '-extract', '-db', 'query_db', '-seg', 'SEGCTE_0.25', '-desc', 'KF_10x10_RGB_1U', '-alias', 'kf'],
+		 cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
 
 
 def is_number(s):

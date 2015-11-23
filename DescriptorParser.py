@@ -130,8 +130,43 @@ class KeyframeParser(DescriptorParser):
 											 num_subarrays, subarray_length, array_kind)
 
 
+class EdgeHistogramParser(DescriptorParser):
+	def __init__(self, descriptor_data):
+		super(EdgeHistogramParser, self).__init__(descriptor_data)
+		self.zones_x = self.options.get('zones_x')
+		self.zones_y = self.options.get('zones_y')
+		self.subdivisions_x = self.options.get('subdivisions_x')
+		self.subdivisions_y = self.options.get('subdivisions_y')
+		self.threshold = self.options.get('threshold')
+		self.quant = self.options.get('quant')
+
+	def get_descriptor_options(self):
+		if self.quant == '1U':
+			array_kind = 'ARRAY_UCHAR'
+		else:
+			array_kind = 'ARRAY_FLOAT'
+		# EHD_4x4_8x8_5_K5_4F
+		descriptor_kind = 'EHD_' + str(self.zones_x) + 'x' + str(self.zones_y) + '_' + \
+						  str(self.subdivisions_x) + 'x' + str(self.subdivisions_y) + '_K5_' + str(self.quant)
+
+		segmentation = 'SEGCTE_0.25'
+		array_length = str(self.zones_x * self.zones_y * 5)
+		num_subarrays = str(4)
+		subarray_length = str(4)
+		return self.fill_descriptor_template(descriptor_kind, segmentation, array_length,
+											 num_subarrays, subarray_length, array_kind)
+
+	def get_data_type(self):
+		return 'f'
+
+	def get_alias(self):
+		return 'ehd'
+
+
 def get_descriptor_parser(descriptor_type, descriptor_data):
 	if descriptor_type == 'GrayHistogram':
 		return GrayHistogramParser(descriptor_data)
 	elif descriptor_type == 'Keyframe':
 		return KeyframeParser(descriptor_data)
+	elif descriptor_type == 'EdgeHistogram':
+		return EdgeHistogramParser(descriptor_data)

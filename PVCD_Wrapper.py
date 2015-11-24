@@ -3,11 +3,12 @@ from subprocess import call
 from string import Template
 import templates
 import os
+import shutil
 from array import array
 import json
 
 path_to_pvcd = '/home/felipe/Documents/memoria/Servidor/multimedia_tools/instalacion/bin/'
-
+path_to_databases = '/home/felipe/Documents/memoria/Servidor/flask/databases/'
 pvcd_db = path_to_pvcd + 'pvcd_db'
 pvcd_search = path_to_pvcd + 'pvcd_search'
 pvcd_detect = path_to_pvcd + 'pvcd_detect'
@@ -59,7 +60,9 @@ def write_descriptors(db_name, descriptor_parser):
 
 
 def new_search_profile(db_name, descriptor_alias):
-
+	db_directory = path_to_databases + 'buscar'
+	if os.path.exists(db_directory):
+		shutil.rmtree(db_directory)
 	db_path = db_name + '_db'
 
 	call([pvcd_search, '-new', '-profile', 'buscar', '-query', db_path, '-reference',\
@@ -86,13 +89,19 @@ def detect():
 	return detections
 
 
-def compute_descriptors(video_filepath):
+def compute_descriptors(video_filepath, descriptor, alias):
 	"""
 	@type video_filepath: str
+	@type descriptor: str
+	@type alias: str
 	"""
+	db_directory = path_to_databases + 'query_db'
+	if os.path.exists(db_directory):
+		shutil.rmtree(db_directory)
+
 	call([pvcd_db, '-new', '-db', 'query_db', video_filepath], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
 	call([pvcd_db, '-segment', '-db', 'query_db', '-seg', 'SEGCTE_0.25'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
-	call([pvcd_db, '-extract', '-db', 'query_db', '-seg', 'SEGCTE_0.25', '-desc', 'KF_10x10_RGB_1U', '-alias', 'kf'],
+	call([pvcd_db, '-extract', '-db', 'query_db', '-seg', 'SEGCTE_0.25', '-desc', descriptor, '-alias', alias],
 		 cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
 
 

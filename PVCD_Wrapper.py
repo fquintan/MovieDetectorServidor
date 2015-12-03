@@ -65,8 +65,8 @@ def new_search_profile(db_name, descriptor_alias):
 		shutil.rmtree(db_directory)
 	db_path = db_name + '_db'
 
-	call([pvcd_search, '-new', '-profile', 'buscar', '-query', db_path, '-reference',\
-		  'videos_db2', '-desc', descriptor_alias, '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
+	call([pvcd_search, '-new', '-profile', 'buscar', '-query', db_path, '-reference',
+		  'videos_db', '-desc', descriptor_alias, '-distance', 'L1'], cwd='/home/felipe/Documents/memoria/Servidor/flask/databases')
 	return
 
 
